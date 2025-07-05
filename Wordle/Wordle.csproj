@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="159palavrasfiltradas.txt" />
+    <None Remove="arquivos\consoantes.txt" />
+    <None Remove="arquivos\palavrasMasSoCom5Letras.txt" />
+    <None Remove="arquivos\vogais.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="arquivos\159palavrasfiltradas.txt" />
+    <EmbeddedResource Include="arquivos\consoantes.txt" />
+    <EmbeddedResource Include="arquivos\palavrasMasSoCom5Letras.txt" />
+    <EmbeddedResource Include="arquivos\vogais.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.50.0" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
+  </ItemGroup>
+
+</Project>
