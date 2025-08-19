@@ -8,9 +8,11 @@ namespace Wordle
 {
     class Wordle
     {
-        Dictionary<int, string> dicionario = new Dictionary<int, string>();
+        private Dictionary<int, string>
+            dicionario = new Dictionary<int, string>();
         
-        Random random = new Random();
+        private Random
+            random = new Random();
         
         private int
             id = 1,
@@ -28,7 +30,7 @@ namespace Wordle
 
         private string
             palavraJogada = "",
-            menu = "Menu Principal",
+            menuEscolhido = "Menu Principal",
             modoDeJogo = "Start",
             resourcePath = "Wordle.arquivos.",
             linha;
@@ -36,11 +38,11 @@ namespace Wordle
         private bool
             contemAntes = false,
             contemDepois = false,
-            validador = true;
+            validadorModoCustom = true;
 
-        List<char> letrasErradas = new List<char>();
+        private List<char> letrasErradas = new List<char>();
 
-        List<string>
+        private List<string>
             palavrasPossiveis = new List<string>(),
             escolhidaLista = new List<string>(),
             palavrasJaJogadas = new List<string>(),
@@ -48,78 +50,108 @@ namespace Wordle
             vogaisRestantes = new List<string>(),
             validadorAmarelo = new List<string>();
 
-        DateTime data;
+        private DateTime
+            data;
         
-        Assembly assembly = Assembly.GetExecutingAssembly();
+        private Assembly
+            assembly = Assembly.GetExecutingAssembly();
 
-        public void menuPrincipal()
+        private Panel
+            tutorial = new Panel("\nO jogo escolherá uma palavra e você terá [yellow]6 tentativas[/] para adivinhá-la.\nCada tentativa consiste na jogada de [blue]1 palavra[/].\n\n[red]ATENÇÃO[/], pois a palavra deve:\n\n* Existir no [blue]dicionário português brasileiro[/].\n* Conter [yellow]5 letras[/] e [yellow]APENAS letras[/].\n* Estar [green]corretamente acentuada[/].\n\nApós cada jogada:\n\n* Letras [green]corretas[/] na posição [green]correta[/] aparecerão em [green]verde[/].\n* Letras [green]corretas[/] na posição [red]incorreta[/] aparecerão em [yellow]amarelo[/].\n* Letras [red]incorretas[/] aparecerão em [red]vermelho[/].\n\nCaso suas tentativas se esgotem, você [red rapidblink]perde o jogo[/].\n\nExistem 3 modos de jogo disponíveis:\n\n* [blue]Clássico[/]: Uma palavra aleatória é escolhida.\n* [blue]Diário[/]: Cada dia uma palavra é escolhida.\n* [blue]Custom[/]: O jogador escolhe um número dentro de um intervalo, este número estará relacionada à uma palavra.")
+            .Header("Como Jogar?").Border(BoxBorder.Rounded);
+
+        public void menu()
         {
-            limparTela();
-            displayTitulo();
-            Console.WriteLine();
-
-            menu = AnsiConsole.Prompt(new SelectionPrompt<string>()
-            .PageSize(10)
-            .AddChoices(new[] {
-                "Novo Jogo","Sair"
-            }));
-        }
-        public void menuModosDeJogo()
-        {
-            limparTela();
-            displayTitulo();
-            Console.WriteLine();
-
-            modoDeJogo = AnsiConsole.Prompt(new SelectionPrompt<string>()
-            .PageSize(10)
-            .AddChoices(new[] {
-            "Clássico","Diário", "Custom"
-            }));
-        }
-
-        public void MenuPosPartida()
-        {
-            switch (modoDeJogo)
+            if (!menuEscolhido.Equals("Pós Partida"))
             {
-                case "Clássico":
+                limparTela();
+                displayTitulo();
+                Console.WriteLine();
+            }
+
+            switch (menuEscolhido)
+            {
+                case "Menu Principal":
                     {
-                        menu = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                        modoDeJogo = "Start";
+
+                        menuEscolhido = AnsiConsole.Prompt(new SelectionPrompt<string>()
                         .PageSize(10)
                         .AddChoices(new[] {
-                        "Jogar Novamente","Menu Principal","Sair"
+                            "Novo Jogo","Como Jogar?","Sair"
                         }));
                         break;
                     }
-                case "Diário":
+                case "Como Jogar?":
                     {
-                        menu = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                        AnsiConsole.Write(tutorial);
+                        Console.WriteLine();
+
+                        menuEscolhido = AnsiConsole.Prompt(new SelectionPrompt<string>()
                         .PageSize(10)
                         .AddChoices(new[] {
-                        "Menu Principal","Sair"
+                            "Novo Jogo","Menu Principal","Sair"
                         }));
                         break;
                     }
-                case "Custom":
+                case "Novo Jogo":
                     {
-                        menu = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                        modoDeJogo = AnsiConsole.Prompt(new SelectionPrompt<string>()
                         .PageSize(10)
                         .AddChoices(new[] {
-                        "Jogar Novamente","Menu Principal","Sair"
+                            "Clássico","Diário","Custom"
                         }));
+                        break;
+                    }
+                case "Pós Partida":
+                    {
+                        switch (modoDeJogo)
+                        {
+                            case "Clássico":
+                                {
+                                    menuEscolhido = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                                    .PageSize(10)
+                                    .AddChoices(new[] {
+                                        "Jogar Novamente","Menu Principal","Sair"
+                                    }));
+                                    break;
+                                }
+                            case "Diário":
+                                {
+                                    menuEscolhido = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                                    .PageSize(10)
+                                    .AddChoices(new[] {
+                                        "Menu Principal","Sair"
+                                    }));
+                                    break;
+                                }
+                            case "Custom":
+                                {
+                                    menuEscolhido = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                                    .PageSize(10)
+                                    .AddChoices(new[] {
+                                        "Jogar Novamente","Menu Principal","Sair"
+                                    }));
+                                    if (menuEscolhido.Equals("Jogar Novamente")) validadorModoCustom = true;
+                                    break;
+                                }
+                        }
                         break;
                     }
             }
         }
+        
         public string getModoDeJogo()
         {
             return modoDeJogo;
         }
 
-        public string getMenu()
+        public string getMenuEscolhido()
         {
-            return menu;
+            return menuEscolhido;
         }
-        public void popularDicioDeJogo()
+        
+        public void popularDicioDeJogo() //Popula dicionário de palavras a serem sorteadas para adivinhação
         {
             using (Stream stream = assembly.GetManifestResourceStream(resourcePath + "159palavrasfiltradas.txt"))
             using (StreamReader reader = new StreamReader(stream))
@@ -132,7 +164,7 @@ namespace Wordle
             }
         }
 
-        public void popularDicioDePossiveisJogadas()
+        public void popularDicioDePossiveisJogadas() //Popula dicionário de palavras possíveis a serem jogadas pelo jogador
         {
             using (Stream stream = assembly.GetManifestResourceStream(resourcePath + "palavrasMasSoCom5Letras.txt"))
             using (StreamReader reader = new StreamReader(stream))
@@ -165,9 +197,10 @@ namespace Wordle
             vogaisRestantes.Clear();
             escolhidaLista.Clear();
             gabarito = new char[5];
+            palavraJogada = "";
         }
 
-        public void setup()
+        public void setup() //Configuração necessária pré inicio de partida.
         {
             switch (modoDeJogo)
             {
@@ -185,7 +218,7 @@ namespace Wordle
                     }
                 case "Custom":
                     {
-                        while (validador == true) {
+                        while (validadorModoCustom == true) {
                             Console.Write("\nEscolha um número inteiro entre 1 e {0}: ", dicionario.Count);
                             try
                             {
@@ -194,11 +227,11 @@ namespace Wordle
                                 {
                                     throw new ArithmeticException();
                                 }
-                                validador = false;
+                                validadorModoCustom = false;
                             }
                             catch (Exception e)
                             {
-                                AnsiConsole.Markup("\n[red]Número inválido.[/]\n\n* Deve ser um número.\n* Não pode estar vazio.\n* Deve estar entre 1 e {0}.\n\nTente novamente!\n", dicionario.Count);
+                                textoCentralizado("\n[red]Número inválido.[/]\n\n* Deve ser um número.\n* Não pode estar vazio.\n* Deve estar entre 1 e "+dicionario.Count+".\n\nTente novamente!\n");
                             }
                         }
                         break;
@@ -207,7 +240,7 @@ namespace Wordle
         }
 
         
-        public void popularVogaisConsoantesRestantes()
+        public void popularVogaisConsoantesRestantes() //Popula os dicionários de vogais e de consoantes restantes
         {
             using (Stream stream = assembly.GetManifestResourceStream(resourcePath + "consoantes.txt"))
             using (StreamReader reader = new StreamReader(stream))
@@ -226,7 +259,7 @@ namespace Wordle
                 }
             }
         }
-        public void arrumarRandomizada()
+        public void arrumarRandomizada() //Coloca a palavra escolhida em 2 variáveis (com/sem acento) para uso ao longo do código
         {
             escolhidaComAcento = dicionario[numeroAleatorio].ToCharArray();
             escolhidaSemAcento = removerAcentos(dicionario[numeroAleatorio]).ToCharArray();
@@ -236,7 +269,7 @@ namespace Wordle
             }
         }
 
-        public void cheatDoDev()
+        public void cheatDoDev() //código que mostra palavra usada, para checagem de funcionamento
         {
             Console.WriteLine(numeroAleatorio + ". " + dicionario[numeroAleatorio]);
             Console.Write("\nCom Acento: ");
@@ -254,10 +287,12 @@ namespace Wordle
 
         public void displayTitulo()
         {
-            Console.Write("\t -******-\n\t  WORDLE\n\t -******-\n");
+            textoCentralizado("-******-\nWORDLE\n-******-\n");
         }
 
         public void atualizarValidadorAmarelo()
+            //atualizador da lista de caracteres da palavra a ser adivinhada
+            //para que seja possivel checar multiplas ocorrencias da mesma letra
         {
             validadorAmarelo.Clear();
             foreach (char letra in escolhidaSemAcento)
@@ -267,18 +302,19 @@ namespace Wordle
         }
 
         public void atualizarLetrasJogadas(string palavra)
+            //similar ao arrumarRandomizada(), ele arruma as letras jogadas pelo jogador em duas variaveis com/sem acentos
         {
             letrasJogadaComAcento = palavra.ToCharArray();
             letrasJogadaSemAcento = removerAcentos(palavra).ToCharArray();
         }
 
-        public void resetContemAmarelos()
+        public void resetContemAmarelos() //reset das variaveis contém, usadas para checagem de letras amarelas
         {
             contemAntes = false;
             contemDepois = false;
         }
 
-        public void removerConsoante(int contador)
+        public void removerConsoante(int contador) //remove consoantes jogadas do display de consoantes restantes
         {
             if (consoantesRestantes.Contains(letrasJogadaSemAcento[contador].ToString()) == true)
             {
@@ -286,7 +322,7 @@ namespace Wordle
             }
         }
 
-        public void removerVogal(int contador)
+        public void removerVogal(int contador) //remove vogal jogada do display de vogais restantes
         {
             if (vogaisRestantes.Contains(letrasJogadaSemAcento[contador].ToString()) == true)
             {
@@ -294,7 +330,7 @@ namespace Wordle
             }
         }
 
-        public void checarAntes(int contador)
+        public void checarAntes(int contador) //checa se existe a letra antes da posição de uma letra na palavra
         {
             for (int contadorCheck = 0; contadorCheck < contador; contadorCheck++)
             {
@@ -305,12 +341,14 @@ namespace Wordle
             }
         }
 
-        public void checarDepois(int contador)
+        public void checarDepois(int contador) //checa se existe a letra depois da posição de uma letra na palavra
         {
             for (int contadorCheck = contador + 1; contadorCheck < 5; contadorCheck++)
             {
+                //checa se a letra existe
                 if (letrasJogadaSemAcento[contador].ToString().Equals(escolhidaSemAcento[contadorCheck].ToString()))
                 {
+                    //checa se a letra existente é uma letra verde, se não for, então ele muda o contém
                     if (letrasJogadaSemAcento[contadorCheck].ToString().Equals(escolhidaSemAcento[contadorCheck].ToString()) == false)
                     {
                         contemDepois = true;
@@ -318,151 +356,127 @@ namespace Wordle
                 }
             }
         }
-        public void checarAmarelo(int contador)
+        public string checarAmarelo(int contador) //checa letras amarelas
         {
             checarAntes(contador);
             checarDepois(contador);
+            //se contem antes ou depois e o contém a letra no validadorAmarelo, ele remove a letra do validador para que seja possível
+            //checar múltiplas ocorrências da mesma letra
             if ((contemAntes == true || contemDepois == true) && validadorAmarelo.Contains(letrasJogadaSemAcento[contador].ToString()) == true)
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write(letrasJogadaComAcento[contador] + " ");
-                Console.ResetColor();
                 validadorAmarelo.Remove(letrasJogadaSemAcento[contador].ToString());
+                return "[yellow]" + letrasJogadaComAcento[contador] + "[/]";
             }
-            else
-            {
-                checarVermelho(contador);
-            }
+            return checarVermelho(contador);
         }
-        public void checarVermelho(int contador)
+        public string checarVermelho(int contador)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write(letrasJogadaComAcento[contador] + " ");
-            Console.ResetColor();
             //adiciona a letra a lista de letras erradas
             if (letrasErradas.Contains(letrasJogadaSemAcento[contador]) == false && escolhidaLista.Contains(letrasJogadaSemAcento[contador].ToString()) == false)
             {
                 letrasErradas.Add(letrasJogadaSemAcento[contador]);
             }
+            return "[red]" + letrasJogadaComAcento[contador] + "[/]";
         }
-        public void checarVerde(int contador)
+        public string checarVerde(int contador)
         {
             if (letrasJogadaSemAcento[contador].ToString().Equals(escolhidaSemAcento[contador].ToString()))
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write(letrasJogadaComAcento[contador] + " ");
-                Console.ResetColor();
                 //marca no gabarito
                 gabarito[contador] = escolhidaComAcento[contador];
                 //remover das opções de amarelo
                 validadorAmarelo.Remove(letrasJogadaSemAcento[contador].ToString());
-
+                return "[green]" + letrasJogadaComAcento[contador] + "[/]";
             }
-            else
-            {
-                checarAmarelo(contador);
-            }
+            return checarAmarelo(contador);
         }
 
-        public void asteJogadasRestantes(int tentativas)
+        public void asteriscoJogadasRestantes(int tentativas) //display visual das jogadas restantes
         {
             for (int restantes = tentativas; restantes > 0; restantes--)
             {
-                Console.WriteLine("\t* * * * *");
+                textoCentralizado("* * * * *");
             }
         }
 
-        public bool checarVitoria()
+        public bool checarVitoria() //validador de vitória
         {
             if (removerAcentos(palavraJogada).Equals(removerAcentos(dicionario[numeroAleatorio])))
             {
-                AnsiConsole.Markup("\n\t[rapidblink bold]FIM DE JOGO![/]\n");
-                Console.Write("\n  *-----------------------*\n");
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("   PARABÉNS! ");
-                Console.ResetColor();
-                Console.Write("Você acertou!\n  *-----------------------*\n\n");
+                textoCentralizado("\n[rapidblink bold]FIM DE JOGO![/]\n");
+                textoCentralizado("\n*-----------------------*\n[green]PARABÉNS![/] Você acertou!\n*-----------------------*\n");
                 vitoria++;
+                menuEscolhido = "Pós Partida";
                 return true;
             }
             else return false;
         }
 
-        public bool checarTentativas(int tentativas)
+        public bool checarTentativas(int tentativas) //validador de tentativas restantes
         {
             if (tentativas == 0)
             {
-                AnsiConsole.Markup("\n\t[rapidblink bold]FIM DE JOGO![/]\n");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("\nVocê perdeu! ");
-                Console.ResetColor();
-                Console.Write("A palavra era ");
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write(dicionario[numeroAleatorio]);
-                Console.ResetColor();
-                Console.WriteLine(".\n");
+                textoCentralizado("\n[rapidblink bold]FIM DE JOGO![/]\n");
+                textoCentralizado("\n[red]Você perdeu![/] A palavra era [green]" + dicionario[numeroAleatorio] + "[/]");
                 derrota++;
+                menuEscolhido = "Pós Partida";
                 return true;
             } else return false;
         }
 
         public void displayTentativas(int tentativas)
         {
-            Console.WriteLine("\nTentativas restantes: " + tentativas);
+            textoCentralizado("\nTentativas restantes: " + tentativas);
         }
 
         public void displayGabarito()
         {
-            Console.Write("Gabarito: ");
+            string gabaritoFormatado = "";
+
             for (int contador = 0; contador < 5; contador++)
             {
                 if (gabarito[contador] != '\0')
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write(gabarito[contador] + " ");
-                    Console.ResetColor();
+                    gabaritoFormatado = gabaritoFormatado + "[green]" + gabarito[contador] + "[/] ";
                 }
                 else
                 {
-                    Console.Write("* ");
+                    gabaritoFormatado = gabaritoFormatado + "* ";
                 }
             }
+            textoCentralizado("Gabarito: \n" + gabaritoFormatado);
         }
 
         public void displayLetrasIncorretas()
         {
-            Console.Write("\n\n\t - Letras incorretas -\n");
-            Console.ForegroundColor = ConsoleColor.Red;
-            foreach (char letraErrada in letrasErradas)
-            {
-                Console.Write(letraErrada + " ");
-            }
+            textoCentralizado("\n- Letras Incorretas -");
+            textoCentralizado("[red]" + string.Join(" ", letrasErradas) + "[/]");
             if (letrasErradas.Any() == false)
             {
-                Console.Write("!NENHUMA!");
+                textoCentralizado("[red]!NENHUMA![/]");
             }
-            Console.ResetColor();
             Console.WriteLine();
+        }
+
+        public void textoCentralizado(string texto) { 
+            AnsiConsole.Write(new Align(new Markup(texto), HorizontalAlignment.Center));
         }
 
         public void displayLetrasRestantes()
         {
-            Console.Write("\n\t - Letras restantes - \n");
-            Console.Write("Consoantes: ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            foreach (string consoantesRestante in consoantesRestantes)
+            textoCentralizado("\n- Letras Restantes -");
+            textoCentralizado("Consoantes:");
+            textoCentralizado("[green]" + string.Join(" ", consoantesRestantes) + "[/]");
+            if (consoantesRestantes.Any() == false)
             {
-                Console.Write(consoantesRestante + " ");
+                textoCentralizado("!NENHUMA!");
             }
-            Console.ResetColor();
-            Console.Write("\nVogais: ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            foreach (string vogaisRestante in vogaisRestantes)
+            textoCentralizado("Vogais:");
+            textoCentralizado("[green]" + string.Join(" ", vogaisRestantes) + "[/]");
+            if (vogaisRestantes.Any() == false)
             {
-                Console.Write(vogaisRestante + " ");
+                textoCentralizado("[red]!NENHUMA![/]");
             }
-            Console.ResetColor();
-            Console.WriteLine();
         }
 
         public void digitarPalavra()
@@ -471,41 +485,36 @@ namespace Wordle
             palavraJogada = Console.ReadLine().ToUpper();
         }
 
-        public void validarPalavraDigitada()
+        public void validarPalavraDigitada() //valida se a palavra digitada pelo jogador está de acordo com as regras
         {
             while (palavraJogada.Length != 5 || palavraJogada.Contains(' ') == true || palavraJogada.Any(char.IsDigit) == true || palavrasPossiveis.Contains(palavraJogada) == false)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\nPALAVRA INVÁLIDA!");
-                Console.ResetColor();
-                Console.WriteLine("A palavra deve:\n* Conter 5 letras.\n* Conter apenas letras. (Não conter números ou espaço)\n* Ser uma palavra existente na língua portuguesa.\n* As acentuações devem estar corretas.\n\nTente novamente.");
+                textoCentralizado("[red]\nPALAVRA INVÁLIDA![/]\nA palavra deve:\n\n* Conter 5 letras *\n* Conter APENAS letras *\n* Existir no português brasileiro *\n* Estar acentuada corretamente *\n\nTente novamente.");
                 digitarPalavra();
             }
         }
 
-        public void realizarJogada()
+        public void realizarJogada() //adiciona palavra jogada à lista de palavras já jogadas
         {
             palavrasJaJogadas.Add(palavraJogada);
         }
 
-        public void comparadorLxL()
+        public void comparadorLxL() //comparador de letras da palavra jogada com as letras da palavra a ser adivinhada
         {
+            string palavraFormatada = "";
+            //aplica tabulação se for o inicio da palavra
             for (int comparador = 0; comparador < 5; comparador++)
             {
-                if (comparador == 0)
-                {
-                    Console.Write("\t");
-                }
-
                 resetContemAmarelos();
 
                 removerConsoante(comparador);
                 removerVogal(comparador);
-                checarVerde(comparador);
+                palavraFormatada = palavraFormatada + checarVerde(comparador)+" ";
             }
+            AnsiConsole.Write(new Align(new Markup(palavraFormatada), HorizontalAlignment.Center));
         }
 
-        public void displayJogadas()
+        public void displayJogadas() //mostra todas as jogadas na tela
         {
             foreach (string palavra in palavrasJaJogadas)
             {
@@ -521,31 +530,32 @@ namespace Wordle
             {
                 case "Clássico":
                     {
-                        Console.WriteLine("\t-----------\n\t PARTIDA {0}\n\t-----------\nVitórias: {1}\tDerrotas: {2}\n", partida, vitoria, derrota);
+                        textoCentralizado("-----------\nPARTIDA " + partida + "\n-----------\nVitórias: " + vitoria + "\nDerrotas: " + derrota + "\n");
                         break;
                     }
                 case "Diário":
                     {
-                        Console.Write("\n\t - DIA - \n\t{0:d}\n\n", data);
+                        textoCentralizado("\n- DIA -\n" + data.Date.ToString("d") + "\n");
                         break;
                     }
                 case "Custom":
                     {
-                        Console.Write("\n       - PALAVRA {0} -\n\n", numeroAleatorio);
+                        textoCentralizado("\n- PALAVRA " + numeroAleatorio + "\n");
                         break;
                     }
             }
         }
-        public void loopRodadas()
+        public void loopRodadas() //loop das rodadas dentro de uma partida
         {
             for (int tentativas = 6; tentativas >= 0; tentativas--)
             {
                 limparTela();
+                //ATIVADOR DE CÓDIGO QUE MOSTRA A PALAVRA SORTEADA
                 //cheatDoDev();
                 displayTitulo();
                 displayHeader();
                 displayJogadas();
-                asteJogadasRestantes(tentativas);
+                asteriscoJogadasRestantes(tentativas);
 
                 if (checarVitoria() == true || checarTentativas(tentativas) == true) break;
 
@@ -561,7 +571,7 @@ namespace Wordle
             }
         }
 
-        public void novoJogo()
+        public void novoJogo() //setup para um novo jogo
         {
             resetVarsParaNovaPartida();
             setup();
@@ -575,18 +585,13 @@ namespace Wordle
 
         public string removerAcentos(string texto)
         {
-            if (string.IsNullOrWhiteSpace(texto))
-                return texto;
+            if (string.IsNullOrWhiteSpace(texto)) return texto;
 
-            var normalizado = texto.Normalize(NormalizationForm.FormD);
+            string normalizado = texto.Normalize(NormalizationForm.FormD);
 
-            var regex = new Regex(@"[\p{Mn}]");
+            Regex regex = new Regex(@"[\p{Mn}]");
             return regex.Replace(normalizado, string.Empty)
                         .Normalize(NormalizationForm.FormC);
-        }
-        public void modoCustom()
-        {
-
         }
     }
 
@@ -599,21 +604,14 @@ namespace Wordle
             wordle.popularDicioDeJogo();
             wordle.popularDicioDePossiveisJogadas();
 
-            while(wordle.getMenu().Equals("Menu Principal"))
+            while(!wordle.getMenuEscolhido().Equals("Sair"))
             {
                 wordle.resetVitDerrPartidas();
-                wordle.menuPrincipal();
+                wordle.menu();
 
-                if(wordle.getMenu().Equals("Novo Jogo"))
-                {
-                    wordle.menuModosDeJogo();
-                }
-
-                while (wordle.getMenu().Equals("Jogar Novamente") || wordle.getMenu().Equals("Novo Jogo"))
+                while (wordle.getMenuEscolhido().Equals("Jogar Novamente") || wordle.getMenuEscolhido().Equals("Novo Jogo") && !wordle.getModoDeJogo().Equals("Start"))
                 {
                     wordle.novoJogo();
-
-                    wordle.MenuPosPartida();
                 }
             }
         }
